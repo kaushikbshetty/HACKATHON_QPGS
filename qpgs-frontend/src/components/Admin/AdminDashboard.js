@@ -9,10 +9,9 @@ const AdminDashboard = () => {
       <div className="sidebar">
         <h2>Admin Dashboard</h2>
         <ul>
-          <li><Link to="/admin/users">Manage Users</Link></li>
+          <li><Link to="/admin/users">Add Users</Link></li>
           <li><Link to="/admin/syllabus">Upload Syllabus</Link></li>
           <li><Link to="/admin/questions">Manage Questions</Link></li>
-          <li><Link to="/admin/settings">System Settings</Link></li>
           <li><Link to="/admin/generate-paper">Generate Question Paper</Link></li>
         </ul>
       </div>

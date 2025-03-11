@@ -1,73 +1,131 @@
-import React, { useState } from "react";
-import "../../styles/AdminStyles.css";
+import React, { useState, useEffect } from "react";
 
 const UploadSyllabus = () => {
-  const [syllabus, setSyllabus] = useState([]);
-  const [newModule, setNewModule] = useState({ name: "", content: "" });
-  const [error, setError] = useState("");
+  const [subjectName, setSubjectName] = useState("");
+  const [file, setFile] = useState(null);
+  const [message, setMessage] = useState("");
+  const [syllabusList, setSyllabusList] = useState([]);
 
-  // Handle syllabus file upload
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      alert(`File "${file.name}" uploaded successfully!`);
-      // In real scenario, you would process the file data here
+  // Fetch syllabus list
+  const fetchSyllabus = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/syllabus");
+      const data = await response.json();
+      setSyllabusList(data);
+    } catch (error) {
+      console.error("Error fetching syllabus:", error);
     }
   };
 
-  // Handle manual module addition
-  const addModule = () => {
-    if (!newModule.name || !newModule.content) {
-      setError("Module name and content are required!");
+  useEffect(() => {
+    fetchSyllabus(); // Load syllabus files when component mounts
+  }, []);
+
+  // Handle file selection
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  // Handle form submission
+  const handleUpload = async () => {
+    if (!subjectName || !file) {
+      setMessage("Please enter subject name and select a file.");
       return;
     }
-    setSyllabus([...syllabus, { id: Date.now(), ...newModule }]);
-    setNewModule({ name: "", content: "" });
-    setError("");
+
+    const formData = new FormData();
+    formData.append("subjectName", subjectName);
+    formData.append("syllabusFile", file);
+
+    try {
+      const response = await fetch("http://localhost:5000/upload-syllabus", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessage("Syllabus uploaded successfully!");
+        alert("Syllabus uploaded successfully!");
+        setSubjectName("");
+        setFile(null);
+        fetchSyllabus(); // Refresh list after upload
+      } else {
+        setMessage(data.error || "Error uploading syllabus.");
+      }
+    } catch (error) {
+      setMessage("Server error. Please try again.");
+      console.error("Upload error:", error);
+    }
   };
 
-  // Handle deleting a module
-  const deleteModule = (id) => {
-    setSyllabus(syllabus.filter(module => module.id !== id));
+  // Handle syllabus deletion
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this syllabus?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/syllabus/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Syllabus deleted successfully!");
+        fetchSyllabus(); // Refresh list after deletion
+      } else {
+        setMessage(data.error || "Error deleting syllabus.");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
   };
 
   return (
     <div>
       <h2>Upload Syllabus</h2>
-      <p>Admins can upload syllabus details via Excel or manually enter module-wise content.</p>
+      {message && <p style={{ color: message.includes("success") ? "green" : "red" }}>{message}</p>}
 
-      {/* File Upload */}
-      <h3>Upload via Excel</h3>
-      <input type="file" accept=".xlsx, .csv" onChange={handleFileUpload} />
-      <p>(Supported formats: .xlsx, .csv)</p>
+      <div>
+        <label>Subject Name:</label>
+        <input
+          type="text"
+          placeholder="Enter Subject Name"
+          value={subjectName}
+          onChange={(e) => setSubjectName(e.target.value)}
+        />
+      </div>
 
-      {/* Manual Entry */}
-      <h3>Manual Syllabus Entry</h3>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <input
-        type="text"
-        placeholder="Module Name"
-        value={newModule.name}
-        onChange={(e) => setNewModule({ ...newModule, name: e.target.value })}
-      />
-      <input
-        type="text"
-        placeholder="Module Content"
-        value={newModule.content}
-        onChange={(e) => setNewModule({ ...newModule, content: e.target.value })}
-      />
-      <button onClick={addModule}>Add Module</button>
+      <div>
+        <label>Choose Syllabus File:</label>
+        <input type="file" accept=".pdf, .docx, .xlsx" onChange={handleFileChange} />
+      </div>
 
-      {/* Display Uploaded Syllabus */}
-      <h3>Uploaded Modules</h3>
-      <ul>
-        {syllabus.map(module => (
-          <li key={module.id}>
-            <strong>{module.name}:</strong> {module.content}
-            <button onClick={() => deleteModule(module.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      <button onClick={handleUpload}>Upload Syllabus</button>
+
+      <h3>Uploaded Syllabus</h3>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Subject Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {syllabusList.map((syllabus) => (
+            <tr key={syllabus._id}>
+              <td>{syllabus.subjectName}</td>
+              <td>
+                <a href={`http://localhost:5000/${syllabus.filePath}`} target="_blank" rel="noopener noreferrer">
+                  <button>View</button>
+                </a>
+                <button onClick={() => handleDelete(syllabus._id)} style={{ marginLeft: "10px", color: "red" }}>
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

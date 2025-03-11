@@ -1,65 +1,170 @@
 import React, { useState } from "react";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import "../../styles/AdminStyles.css";
-
-// Sample question bank (replace with backend data if needed)
-const sampleQuestions = [
-  { id: 1, subject: "Math", module: "Algebra", text: "Solve x + 2 = 5", type: "2-mark", co: "CO1", po: "PO1", bloom: "Remember" },
-  { id: 2, subject: "Math", module: "Geometry", text: "Define a triangle", type: "10-mark", co: "CO2", po: "PO2", bloom: "Understand" },
-  { id: 3, subject: "Computer Networks", module: "Routing", text: "Explain OSPF Routing Protocol", type: "2-mark", co: "CO1", po: "PO3", bloom: "Apply" },
-  { id: 4, subject: "Internet of Things", module: "IoT Basics", text: "Define IoT and its applications", type: "10-mark", co: "CO3", po: "PO4", bloom: "Analyze" },
-  { id: 5, subject: "Advanced Web Technology", module: "React", text: "What are React hooks?", type: "2-mark", co: "CO2", po: "PO2", bloom: "Understand" },
-  { id: 6, subject: "C#", module: "OOP Concepts", text: "Explain polymorphism in C#", type: "10-mark", co: "CO1", po: "PO1", bloom: "Remember" },
-  { id: 7, subject: "NoSQL", module: "MongoDB", text: "What are advantages of NoSQL databases?", type: "2-mark", co: "CO3", po: "PO3", bloom: "Apply" },
-];
 
 const GenerateQuestionPaper = () => {
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [questionPattern, setQuestionPattern] = useState({ "2-mark": 2, "10-mark": 1 });
+  const [studentUsn, setStudentUsn] = useState("");
+  const [questionCounts, setQuestionCounts] = useState({
+    "2-mark": 2,
+    "8-mark": 4,
+  });
   const [generatedPaper, setGeneratedPaper] = useState([]);
 
-  // Handle subject selection
+  const subjects = ["Internet of Things", "Computer Networks", "Advanced Web Technology", "NoSQL"];
+
+  const questionBank = {
+    "Internet of Things": {
+      "2-mark": [
+        "What is IoT?",
+        "Define MQTT protocol.",
+        "What are IoT sensors?",
+        "Explain Edge computing in IoT.",
+        "List two applications of IoT in healthcare."
+      ],
+      "8-mark": [
+        "Explain IoT architecture with a neat diagram.",
+        "Describe the working of RFID technology in IoT.",
+        "Compare Wi-Fi, Zigbee, and Bluetooth in IoT communication.",
+        "Explain the role of Cloud Computing in IoT.",
+        "What are the security challenges in IoT?"
+      ],
+    },
+    "Computer Networks": {
+      "2-mark": [
+        "What is the purpose of a subnet mask?",
+        "Define IP address.",
+        "What is a MAC address?",
+        "Explain CSMA/CD.",
+        "What is the role of a router in a network?"
+      ],
+      "8-mark": [
+        "Explain TCP/IP model with a neat diagram.",
+        "Compare circuit switching and packet switching.",
+        "Discuss the working of DNS with an example.",
+        "What is NAT? Explain its types.",
+        "Describe congestion control mechanisms in computer networks."
+      ],
+    },
+    "Advanced Web Technology": {
+      "2-mark": [
+        "What is a RESTful API?",
+        "Define JSX in React.",
+        "What is the purpose of Redux in React?",
+        "What are WebSockets?",
+        "Explain the concept of responsive web design."
+      ],
+      "8-mark": [
+        "Compare client-side and server-side rendering.",
+        "Explain the working of the Virtual DOM in React.",
+        "Discuss the benefits and limitations of Single Page Applications (SPA).",
+        "What are the different HTTP methods in REST API? Explain.",
+        "Explain how authentication and authorization work in web applications."
+      ],
+    },
+    "NoSQL": {
+      "2-mark": [
+        "What is NoSQL?",
+        "Define CAP theorem.",
+        "Differentiate between SQL and NoSQL databases.",
+        "What are the types of NoSQL databases?",
+        "Explain BASE property in NoSQL."
+      ],
+      "8-mark": [
+        "Explain the characteristics of NoSQL databases.",
+        "Compare key-value, document, column-family, and graph databases.",
+        "Describe MongoDB indexing and aggregation framework.",
+        "What are the advantages and disadvantages of NoSQL databases?",
+        "Explain how data replication works in NoSQL."
+      ],
+    },
+  };
+
   const handleSubjectChange = (event) => {
     setSelectedSubject(event.target.value);
   };
 
-  // Generate Question Paper
+  const handleUsnChange = (event) => {
+    setStudentUsn(event.target.value);
+  };
+
   const generatePaper = () => {
     if (!selectedSubject) {
       alert("Please select a subject!");
       return;
     }
 
-    let selectedQuestions = [];
-    Object.keys(questionPattern).forEach((type) => {
-      const filteredQuestions = sampleQuestions.filter(
-        (q) => q.subject === selectedSubject && q.type === type
-      );
+    const twoMarkQuestions = questionBank[selectedSubject]["2-mark"]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, questionCounts["2-mark"]);
 
-      let selected = filteredQuestions.length >= questionPattern[type]
-        ? filteredQuestions.sort(() => 0.5 - Math.random()).slice(0, questionPattern[type])
-        : filteredQuestions;
+    const eightMarkQuestions = questionBank[selectedSubject]["8-mark"]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, questionCounts["8-mark"]);
 
-      selectedQuestions = [...selectedQuestions, ...selected];
-    });
+    const selectedQuestions = [...twoMarkQuestions.map((q) => ({ text: q, type: "2-mark" })), 
+                               ...eightMarkQuestions.map((q) => ({ text: q, type: "8-mark" }))];
 
     setGeneratedPaper(selectedQuestions);
     generatePDF(selectedQuestions);
   };
 
-  // Function to generate and save the question paper as a PDF
   const generatePDF = (questions) => {
     const doc = new jsPDF();
-    doc.text("Generated Question Paper", 14, 10);
-    
-    const tableData = questions.map(q => [q.text, q.type, q.co, q.po, q.bloom]);
-    
-    doc.autoTable({
-      head: [["Question", "Marks", "CO", "PO", "Bloom's Taxonomy"]],
-      body: tableData,
-      startY: 20,
-    });
+    doc.setFont("times", "bold");
+    doc.setFontSize(16);
+    doc.text("ST. JOSEPH ENGINEERING COLLEGE, MANGALORE", 40, 10);
+    doc.setFontSize(12);
+    doc.text(`Student USN: ${studentUsn}`, 10, 20);
+    doc.text(`Subject: ${selectedSubject}`, 10, 30);
+
+    let startY = 40;
+
+    const twoMarkQuestions = questions.filter((q) => q.type === "2-mark");
+    const eightMarkQuestions = questions.filter((q) => q.type === "8-mark");
+
+    if (twoMarkQuestions.length > 0) {
+      doc.setFontSize(14);
+      doc.text("PART A - Answer any TWO questions", 10, startY);
+      startY += 10;
+
+      autoTable(doc, {
+        head: [["Q.No", "Question (2 Marks)"]],
+        body: twoMarkQuestions.map((q, index) => [`${index + 1}`, q.text]),
+        startY: startY,
+      });
+
+      startY += (twoMarkQuestions.length * 10) + 10;
+    }
+
+    if (eightMarkQuestions.length > 0) {
+      doc.setFontSize(14);
+      doc.text("PART B - Answer any TWO questions per Module", 10, startY);
+      startY += 10;
+
+      let moduleCount = 1;
+      for (let i = 0; i < eightMarkQuestions.length; i += 4) {
+        doc.setFontSize(12);
+        doc.text(`Module ${moduleCount}`, 10, startY);
+        startY += 10;
+
+        autoTable(doc, {
+          head: [["Q.No", "Question"]],
+          body: [
+            [`${moduleCount}.1a`, eightMarkQuestions[i]?.text || ""],
+            [`${moduleCount}.1b`, eightMarkQuestions[i + 1]?.text || ""],
+            ["OR", ""],
+            [`${moduleCount}.2a`, eightMarkQuestions[i + 2]?.text || ""],
+            [`${moduleCount}.2b`, eightMarkQuestions[i + 3]?.text || ""],
+          ],
+          startY: startY,
+        });
+
+        startY += 60;
+        moduleCount++;
+      }
+    }
 
     doc.save("Question_Paper.pdf");
   };
@@ -68,34 +173,18 @@ const GenerateQuestionPaper = () => {
     <div className="question-paper-container">
       <h2>Generate Question Paper</h2>
 
-      {/* Subject Selection */}
+      <label>Student USN:</label>
+      <input type="text" value={studentUsn} onChange={handleUsnChange} placeholder="Enter USN" />
+
       <label>Select Subject:</label>
       <select value={selectedSubject} onChange={handleSubjectChange}>
         <option value="">-- Select --</option>
-        <option value="Math">Math</option>
-        <option value="Computer Networks">Computer Networks</option>
-        <option value="Internet of Things">Internet of Things</option>
-        <option value="Advanced Web Technology">Advanced Web Technology</option>
-        <option value="C#">C#</option>
-        <option value="NoSQL">NoSQL</option>
+        {subjects.map((subject, index) => (
+          <option key={index} value={subject}>{subject}</option>
+        ))}
       </select>
 
-      {/* Generate Button */}
       <button onClick={generatePaper}>Generate Paper</button>
-
-      {/* Display Generated Paper */}
-      {generatedPaper.length > 0 && (
-        <div className="question-paper">
-          <h3>Generated Question Paper</h3>
-          <ol>
-            {generatedPaper.map((q) => (
-              <li key={q.id}>
-                {q.text} ({q.type}, CO: {q.co}, PO: {q.po}, Bloom: {q.bloom})
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
     </div>
   );
 };

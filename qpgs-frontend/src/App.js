@@ -5,7 +5,6 @@ import AdminDashboard from "./components/Admin/AdminDashboard";
 import ManageUsers from "./components/Admin/ManageUsers";
 import UploadSyllabus from "./components/Admin/UploadSyllabus";
 import ManageQuestions from "./components/Admin/ManageQuestions";
-import SystemSettings from "./components/Admin/SystemSettings";
 import GenerateQuestionPaper from "./components/Admin/GenerateQuestionPaper";
 import Login from "./pages/Login";
 
@@ -19,7 +18,6 @@ function App() {
           <Route path="users" element={<ManageUsers />} />
           <Route path="syllabus" element={<UploadSyllabus />} />
           <Route path="questions" element={<ManageQuestions />} />
-          <Route path="settings" element={<SystemSettings />} />
           <Route path="generate-paper" element={<GenerateQuestionPaper />} />
         </Route>
       </Routes>

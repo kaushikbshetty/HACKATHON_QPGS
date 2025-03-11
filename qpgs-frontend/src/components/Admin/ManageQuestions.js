@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../styles/AdminStyles.css";
-
-
 
 const ManageQuestions = () => {
   const [questions, setQuestions] = useState([]);
@@ -16,25 +14,59 @@ const ManageQuestions = () => {
   });
   const [error, setError] = useState("");
 
+  // Fetch questions from MongoDB
+  useEffect(() => {
+    fetch("http://localhost:5000/questions")
+      .then((res) => res.json())
+      .then((data) => setQuestions(data))
+      .catch((err) => console.error("Error fetching questions:", err));
+  }, []);
+
   // Handle input change
   const handleChange = (e) => {
     setNewQuestion({ ...newQuestion, [e.target.name]: e.target.value });
   };
 
-  // Add new question
-  const addQuestion = () => {
+  // Add new question to MongoDB
+  const addQuestion = async () => {
     if (!newQuestion.subject || !newQuestion.module || !newQuestion.questionText) {
       setError("All fields are required!");
       return;
     }
-    setQuestions([...questions, { id: Date.now(), ...newQuestion }]);
-    setNewQuestion({ subject: "", module: "", questionText: "", type: "2-mark", co: "", po: "", bloomLevel: "" });
-    setError("");
+    
+    try {
+      const res = await fetch("http://localhost:5000/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newQuestion),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setQuestions([...questions, data]); // Update UI with new question
+        setNewQuestion({ subject: "", module: "", questionText: "", type: "2-mark", co: "", po: "", bloomLevel: "" });
+        setError("");
+      } else {
+        setError(data.error);
+      }
+    } catch (err) {
+      console.error("Error adding question:", err);
+    }
   };
 
-  // Delete question
-  const deleteQuestion = (id) => {
-    setQuestions(questions.filter((q) => q.id !== id));
+  // Delete question from MongoDB
+  const deleteQuestion = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/questions/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setQuestions(questions.filter((q) => q._id !== id)); // Update UI
+      }
+    } catch (err) {
+      console.error("Error deleting question:", err);
+    }
   };
 
   return (
@@ -74,7 +106,7 @@ const ManageQuestions = () => {
         </thead>
         <tbody>
           {questions.map((q) => (
-            <tr key={q.id}>
+            <tr key={q._id}>
               <td>{q.subject}</td>
               <td>{q.module}</td>
               <td>{q.questionText}</td>
@@ -83,7 +115,7 @@ const ManageQuestions = () => {
               <td>{q.po}</td>
               <td>{q.bloomLevel}</td>
               <td>
-                <button className="delete-btn" onClick={() => deleteQuestion(q.id)}>Delete</button>
+                <button className="delete-btn" onClick={() => deleteQuestion(q._id)}>Delete</button>
               </td>
             </tr>
           ))}
