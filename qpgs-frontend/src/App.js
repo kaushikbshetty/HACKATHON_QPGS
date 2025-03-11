@@ -1,24 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AdminDashboard from "./components/Admin/AdminDashboard";
+import ManageUsers from "./components/Admin/ManageUsers";
+import UploadSyllabus from "./components/Admin/UploadSyllabus";
+import ManageQuestions from "./components/Admin/ManageQuestions";
+import SystemSettings from "./components/Admin/SystemSettings";
+import GenerateQuestionPaper from "./components/Admin/GenerateQuestionPaper";
+import Login from "./pages/Login";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<AdminDashboard />} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/admin" element={<AdminDashboard />}>
+          <Route path="users" element={<ManageUsers />} />
+          <Route path="syllabus" element={<UploadSyllabus />} />
+          <Route path="questions" element={<ManageQuestions />} />
+          <Route path="settings" element={<SystemSettings />} />
+          <Route path="generate-paper" element={<GenerateQuestionPaper />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 

@@ -1,0 +1,189 @@
+/* --- Global Styles --- */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Admin Dashboard Layout --- */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* --- Sidebar Navigation --- */
+.sidebar {
+  width: 200px; /* Fixed width */
+  background: #2c3e50;
+  color: white;
+  padding: 20px;
+  height: 100vh; /* Full height */
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto; /* Enable scrolling if content is longer */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar h2 {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  padding: 12px;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 12px;
+  border-radius: 5px;
+  transition: background 0.3s ease-in-out;
+}
+
+.sidebar ul li a:hover {
+  background: #34495e;
+}
+
+/* --- Main Content Area --- */
+.main-content {
+  margin-left: 260px; /* Adjusted for sidebar width */
+  padding: 20px;
+  width: calc(100% - 260px); /* Ensures content fits properly */
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* --- Forms & Inputs --- */
+form {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* --- Buttons --- */
+button {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+/* Delete Button */
+.delete-btn {
+  background-color: #e74c3c;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+/* --- Tables --- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+th, td {
+  padding: 10px;
+}
+
+th {
+  background-color: #2c3e50;
+  color: white;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* --- Manage Users & System Settings --- */
+.roles-table th {
+  background-color: #27ae60;
+}
+
+.roles-table td, .roles-table th {
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+/* --- Generate Question Paper --- */
+.question-paper-container {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  margin-top: 20px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.question-paper {
+  background: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.question-paper ol {
+  padding: 0;
+  list-style-position: inside;
+}
+
+.question-paper li {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* --- Responsive Design (For Smaller Screens) --- */
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 60px; /* Collapse sidebar */
+    padding: 10px;
+    text-align: center;
+  }
+
+  .sidebar h2 {
+    display: none; /* Hide title */
+  }
+
+  .sidebar ul li a {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .main-content {
+    margin-left: 80px; /* Adjust content area */
+  }
+}
